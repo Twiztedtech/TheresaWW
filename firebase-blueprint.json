@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "Wish": {
+      "title": "Wish",
+      "description": "An elegant celebratory wish left by family or friends for Theresa",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the sender"
+        },
+        "message": {
+          "type": "string",
+          "description": "The heartfelt wish text"
+        },
+        "photoBase64": {
+          "type": "string",
+          "description": "Optional attached low-resolution compressed image in base64 format"
+        },
+        "recipient": {
+          "type": "string",
+          "description": "The recipient's name (e.g. theresa or therese)"
+        },
+        "createdAt": {
+          "type": "object",
+          "description": "Timestamp when the wish was submitted"
+        }
+      },
+      "required": ["name", "message", "recipient", "createdAt"]
+    }
+  },
+  "firestore": {
+    "artifacts/{appId}/public/data/wishes/{wishId}": {
+      "schema": "Wish",
+      "description": "Celebration wishes written by guests"
+    }
+  }
+}

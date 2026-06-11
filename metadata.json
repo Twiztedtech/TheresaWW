@@ -1,0 +1,6 @@
+{
+  "name": "Theresa's Celebration Portal",
+  "description": "A magnificent digital celebration box for Theresa. Features a virtual opening envelope with an interactive notebook, beautiful ambient synthesizer soundtrack, customized AI poetry engine, cherished memories gallery, and a real-time wishes guestbook.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
