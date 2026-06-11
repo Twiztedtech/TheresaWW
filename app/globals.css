@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@theme {
+  --font-cursive: var(--font-cursive), cursive;
+}
+
 /* Custom styles for Theresa's Celebration Portal */
 @layer base {
   body {

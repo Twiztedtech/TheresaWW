@@ -477,19 +477,34 @@ export default function Page() {
       </div>
 
       {/* --- PORTAL NAVIGATION HEADER --- */}
-      <header className="w-full max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row gap-4 justify-between items-center z-20">
-        <div className="flex items-center gap-2.5">
-          <span className="font-serif italic text-lg sm:text-xl font-black tracking-widest text-[#800020] dark:text-amber-300 uppercase bg-white/75 dark:bg-[#250818]/90 px-4 py-1.5 rounded-full shadow-md border border-[#800020]/10 dark:border-amber-500/20">
-            {"Theresa's Festival of Life"}
-          </span>
-          <span className="flex h-3 w-3 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
-          </span>
+      <header className="w-full max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row gap-4 justify-between items-center z-20">
+        {/* Left Side spacer or close envelope button on desktop */}
+        <div className="w-full md:w-1/4 flex justify-center md:justify-start order-2 md:order-1">
+          {isOpen && (
+            <button 
+              onClick={() => setIsOpen(false)}
+              className="text-[10px] uppercase tracking-widest font-black text-[#800020] dark:text-amber-300 hover:text-[#14B8A6] dark:hover:text-amber-200 flex items-center gap-2 transition-colors duration-200"
+            >
+              ◀ Close Envelope
+            </button>
+          )}
         </div>
 
-        {/* Header Control Buttons Row */}
-        <div className="flex items-center gap-3">
+        {/* Centered Cursive Title */}
+        <div className="flex justify-center items-center gap-3 order-1 md:order-2 md:flex-grow">
+          <div className="bg-white/75 dark:bg-[#250818]/90 px-6 py-2 rounded-full shadow-lg border border-[#800020]/15 dark:border-amber-500/20 backdrop-blur-md flex items-center gap-3">
+            <span className="font-cursive text-3xl sm:text-4xl tracking-wide font-normal bg-gradient-to-r from-rose-900 via-purple-700 to-rose-950 dark:from-amber-300 dark:via-amber-400 dark:to-yellow-350 bg-clip-text text-transparent">
+              {"Theresa's Festival of Life"}
+            </span>
+            <span className="flex h-3 w-3 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
+            </span>
+          </div>
+        </div>
+
+        {/* Header Control Buttons Row on the Right */}
+        <div className="w-full md:w-1/4 flex justify-center md:justify-end items-center gap-3 order-3">
           {/* Dynamic Light/Dark Theme Switcher */}
           <button
             onClick={toggleDarkMode}
