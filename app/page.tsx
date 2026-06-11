@@ -129,7 +129,7 @@ const MEMORIES: MemoryPhoto[] = [
 
 export default function Page() {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0); // 0: Cover, 1: Tribute, 2: Gallery, 3: Guestbook
+  const [currentPage, setCurrentPage] = useState(0); // 0: Cover, 1: Tribute, 2: Gallery, 3: Video, 4: Guestbook
   const [wishes, setWishes] = useState<any[]>([]);
   const [activePhoto, setActivePhoto] = useState<any | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -442,6 +442,7 @@ export default function Page() {
     { label: "Welcome Cover", icon: "❀", activeBg: "bg-amber-600", hoverBg: "hover:bg-amber-100", activeText: "text-white" }, 
     { label: "Tribute & Poetry", icon: "✉", activeBg: "bg-violet-700", hoverBg: "hover:bg-purple-100", activeText: "text-white" }, 
     { label: "Memory Lane", icon: "✦", activeBg: "bg-teal-700", hoverBg: "hover:bg-teal-100", activeText: "text-white" }, 
+    { label: "Tribute Video", icon: "▶", activeBg: "bg-rose-700", hoverBg: "hover:bg-rose-100", activeText: "text-white" },
     { label: "Wishes Guestbook", icon: "✎", activeBg: "bg-[#800020]", hoverBg: "hover:bg-pink-100", activeText: "text-white" } 
   ];
 
@@ -858,7 +859,7 @@ export default function Page() {
                                 <button
                                   onClick={() => {
                                     setMessageText(generatedPoem);
-                                    setCurrentPage(3); // transition to guestbook
+                                    setCurrentPage(4); // transition to guestbook
                                     showStatus("success", "Poem successfully drafted into your Guestbook wish box!");
                                   }}
                                   className="flex-1 py-2.5 border-2 border-purple-600 dark:border-amber-500/40 text-purple-600 dark:text-amber-300 hover:bg-purple-50 dark:hover:bg-amber-500/10 text-xs font-black tracking-widest uppercase rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5"
@@ -926,8 +927,77 @@ export default function Page() {
                     </div>
                   )}
 
-                  {/* --- PAGE 3: GUESTBOOK & AI MESSAGE SENTIMENT POLISHER --- */}
+                  {/* --- PAGE 3: TRIBUTE VIDEO --- */}
                   {currentPage === 3 && (
+                    <div className="flex flex-col h-full animate-[fadeIn_0.5s_ease-out]">
+                      <div className="border-b-2 border-rose-100 dark:border-rose-950/20 pb-3 mb-4 flex justify-between items-center">
+                        <div>
+                          <h3 className="font-serif text-2xl font-black text-rose-900 dark:text-amber-300 flex items-center gap-2">
+                            <span>Tribute Video</span>
+                            <span className="text-[#800020] dark:text-amber-400">♥</span>
+                          </h3>
+                          <p className="text-[10px] uppercase font-bold text-gray-400">Honoring Theresa's journey and beautiful moments</p>
+                        </div>
+                        <div className="text-right px-2">
+                          <span className="font-cursive text-[#800020] dark:text-amber-300 text-2xl font-black">Theresa</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow min-h-0">
+                        {/* Video Embed */}
+                        <div className="lg:col-span-8 flex flex-col justify-between">
+                          <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-xl border-4 border-amber-400/30 bg-black relative group">
+                            <iframe
+                              width="100%"
+                              height="100%"
+                              src="https://www.youtube.com/embed/Pe-1XS5RU9o"
+                              title="Theresa's Tribute Video"
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                              className="w-full h-full"
+                            ></iframe>
+                          </div>
+                          <div className="mt-3">
+                            <h4 className="font-serif text-base font-black text-[#800020] dark:text-amber-300">Celebrating Theresa</h4>
+                            <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">A visual showcase of memories, milestones, and family blessings.</p>
+                          </div>
+                        </div>
+                        {/* Memory Lane Preview Column */}
+                        <div className="lg:col-span-4 flex flex-col justify-between min-h-0 bg-slate-50/50 dark:bg-zinc-950/20 rounded-2xl border border-gray-100 dark:border-zinc-800/60 p-4">
+                          <p className="text-[9px] uppercase tracking-wider font-extrabold text-[#800020] dark:text-amber-450 mb-2 flex items-center gap-1.5">
+                            <Sparkles size={11} className="animate-pulse" />
+                            <span>Moments of Grace</span>
+                          </p>
+                          <div className="flex flex-row lg:flex-col gap-3 overflow-auto flex-grow custom-scrollbar">
+                            {MEMORIES.slice(0, 6).map((photo, index) => (
+                              <div
+                                key={index}
+                                onClick={() => setActivePhoto(photo)}
+                                className="flex-grow w-24 h-24 lg:w-full lg:h-auto aspect-[4/3] rounded-xl overflow-hidden border-2 border-amber-400/30 hover:border-amber-450 shrink-0 shadow-sm cursor-zoom-in group relative transition-all duration-300 bg-white dark:bg-[#1E0814]"
+                              >
+                                <img 
+                                  src={photo.url} 
+                                  alt={photo.title}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                                  onError={(e: any) => e.target.src = photo.fallbackUrl} 
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <span className="text-[8px] text-white font-bold tracking-wider uppercase">Expand</span>
+                                </div>
+                                <div className="absolute bottom-1 left-1 right-1 bg-black/40 backdrop-blur-[2px] py-0.5 px-1 rounded text-[7px] text-white truncate text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {photo.title}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* --- PAGE 4: GUESTBOOK & AI MESSAGE SENTIMENT POLISHER --- */}
+                  {currentPage === 4 && (
                     <div className="flex flex-col h-full animate-[fadeIn_0.5s_ease-out]">
                       <div className="border-b-2 border-[#800020]/20 dark:border-amber-500/10 pb-3 mb-4">
                         <h3 className="font-serif text-2xl font-black text-[#800020] dark:text-amber-300 flex items-center gap-2">
@@ -1110,7 +1180,7 @@ export default function Page() {
 
                 {/* Notebook Navigation Footer Indicators */}
                 <div className="mt-6 flex justify-between items-center text-[10px] font-bold text-gray-400 dark:text-gray-500 font-mono border-t border-gray-100 dark:border-zinc-800 pt-4">
-                  <span>PAGE {currentPage + 1} OF 4</span>
+                  <span>PAGE {currentPage + 1} OF 5</span>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
@@ -1120,8 +1190,8 @@ export default function Page() {
                       PREV
                     </button>
                     <button
-                      onClick={() => setCurrentPage(prev => Math.min(3, prev + 1))}
-                      disabled={currentPage === 3}
+                      onClick={() => setCurrentPage(prev => Math.min(4, prev + 1))}
+                      disabled={currentPage === 4}
                       className="p-1 px-2.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 disabled:opacity-30 transition-colors text-[#800020] dark:text-amber-300"
                     >
                       NEXT
