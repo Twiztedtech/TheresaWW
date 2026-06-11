@@ -132,8 +132,7 @@ export default function Page() {
   
   // Audio state
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const synthIntervalRef = useRef<any>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Form states
   const [senderName, setSenderName] = useState("");
@@ -261,87 +260,47 @@ export default function Page() {
     }
   };
 
-  // --- BUILT-IN AMBIENT SYNTHESIZER ---
-  const startSynthesizer = () => {
+  // --- CLOUDINARY AUDIO TRACK PLAYER ---
+  const startAudio = () => {
     try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContextClass) return;
-      
-      const ctx = new AudioContextClass();
-      audioContextRef.current = ctx;
-
-      // Joyful, prayerful pentatonic scale reflecting therapeutic beauty (C4, D4, E4, G4, A4, C5, D5, E5, G5, A5)
-      const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00];
-      
-      const playNote = () => {
-        if (ctx.state === "suspended") return;
-        
-        const osc = ctx.createOscillator();
-        const gainNode = ctx.createGain();
-        
-        // Stereo panning for immersive acoustic wind chime movement
-        let pannerNode: StereoPannerNode | null = null;
-        if (ctx.createStereoPanner) {
-          pannerNode = ctx.createStereoPanner();
-        }
-
-        osc.type = Math.random() > 0.65 ? "sine" : "triangle";
-        const note = scale[Math.floor(Math.random() * scale.length)];
-        osc.frequency.setValueAtTime(note, ctx.currentTime);
-        
-        gainNode.gain.setValueAtTime(0, ctx.currentTime);
-        // Linear attack, exponential decay for chime acoustics
-        gainNode.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.15);
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 4.5);
-        
-        if (pannerNode) {
-          pannerNode.pan.value = (Math.random() * 2) - 1;
-          osc.connect(pannerNode);
-          pannerNode.connect(gainNode);
-        } else {
-          osc.connect(gainNode);
-        }
-        
-        gainNode.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 4.6);
-      };
-
-      // Play soft opening chord
-      playNote();
-      setTimeout(playNote, 350);
-      setTimeout(playNote, 700);
-
-      synthIntervalRef.current = setInterval(() => {
-        if (Math.random() > 0.3) {
-          playNote();
-        }
-      }, 1600);
-
-      setIsPlaying(true);
+      if (!audioRef.current) {
+        const audio = new Audio("https://res.cloudinary.com/savvyone/video/upload/v1781156995/Theresa_On_Zoom_ax7awn.wav");
+        audio.loop = true;
+        audioRef.current = audio;
+      }
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch((err) => {
+        console.warn("Audio playback initiated but was blocked by browser autoplay policies:", err);
+      });
     } catch (e) {
-      console.warn("Web Audio API blocked or unsupported by browser client policies:", e);
+      console.warn("Audio initialization failed:", e);
     }
   };
 
   const toggleMusic = () => {
-    if (!audioContextRef.current) {
-      startSynthesizer();
+    if (!audioRef.current) {
+      startAudio();
     } else {
-      if (audioContextRef.current.state === "running") {
-        audioContextRef.current.suspend();
+      if (isPlaying) {
+        audioRef.current.pause();
         setIsPlaying(false);
-      } else if (audioContextRef.current.state === "suspended") {
-        audioContextRef.current.resume();
-        setIsPlaying(true);
+      } else {
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch((err) => {
+          console.error("Audio play failed:", err);
+        });
       }
     }
   };
 
   useEffect(() => {
     return () => {
-      if (synthIntervalRef.current) clearInterval(synthIntervalRef.current);
-      if (audioContextRef.current) audioContextRef.current.close();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
   }, []);
 
@@ -421,8 +380,8 @@ export default function Page() {
 
   const handleOpenEnvelope = () => {
     setIsOpen(true);
-    if (!isPlaying && !audioContextRef.current) {
-      startSynthesizer();
+    if (!isPlaying && !audioRef.current) {
+      startAudio();
     }
   };
 
