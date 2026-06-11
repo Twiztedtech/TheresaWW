@@ -1,5 +1,5 @@
 node_modules/
-# .next/
+.next/
 coverage/
 .DS_Store
 *.log
