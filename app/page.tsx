@@ -23,7 +23,9 @@ import {
   X, 
   PenTool, 
   Star,
-  Crown
+  Crown,
+  Sun,
+  Moon
 } from "lucide-react";
 import { 
   db, 
@@ -129,6 +131,7 @@ export default function Page() {
   const [currentPage, setCurrentPage] = useState(0); // 0: Cover, 1: Tribute, 2: Gallery, 3: Guestbook
   const [wishes, setWishes] = useState<any[]>([]);
   const [activePhoto, setActivePhoto] = useState<any | null>(null);
+  const [darkMode, setDarkMode] = useState(false);
   
   // Audio state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -153,7 +156,33 @@ export default function Page() {
   useEffect(() => {
     testConnection();
     initiateAnonymousAuth();
+
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      setDarkMode(true);
+      document.documentElement.classList.add("dark");
+    } else if (savedTheme === "light") {
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    } else {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setDarkMode(prefersDark);
+      if (prefersDark) {
+        document.documentElement.classList.add("dark");
+      }
+    }
   }, []);
+
+  const toggleDarkMode = () => {
+    const nextVal = !darkMode;
+    setDarkMode(nextVal);
+    localStorage.setItem("theme", nextVal ? "dark" : "light");
+    if (nextVal) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
 
   // --- REAL-TIME FIRESTORE WISHES BOARD SUBSCRIPTION ---
   useEffect(() => {
@@ -393,7 +422,7 @@ export default function Page() {
   ];
 
   return (
-    <div className="min-h-screen text-[#1E0B14] font-sans flex flex-col justify-between relative overflow-x-hidden selection:bg-[#800020]/20 select-none pb-6">
+    <div className="min-h-screen text-[#1E0B14] dark:text-[#FAF3F6] font-sans flex flex-col justify-between relative overflow-x-hidden selection:bg-[#800020]/20 select-none pb-6">
       
       {/* --- BACKBONE DECORATIONS AND VIBRANT BACKGROUND --- */}
       <div className="absolute inset-0 z-0 overflow-hidden animate-[fadeIn_1s_ease-out]">
@@ -409,8 +438,8 @@ export default function Page() {
           }}
         />
         {/* Colorful dynamic radiant overlay representing Theresa's favorite color spectrum: purple, teal, burgundy, orange */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#800020]/30 via-[#14B8A6]/20 to-amber-500/15 mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-white/45"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#800020]/30 via-[#14B8A6]/20 to-amber-500/15 mix-blend-multiply dark:opacity-40"></div>
+        <div className="absolute inset-0 bg-white/45 dark:bg-[#12050E]/85"></div>
       </div>
 
       {/* Floating Sparkling Orbs representing celebration elements */}
@@ -425,7 +454,7 @@ export default function Page() {
       {/* --- PORTAL NAVIGATION HEADER --- */}
       <header className="w-full max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row gap-4 justify-between items-center z-20">
         <div className="flex items-center gap-2.5">
-          <span className="font-serif italic text-lg sm:text-xl font-black tracking-widest text-[#800020] uppercase bg-white/75 px-4 py-1.5 rounded-full shadow-md border border-[#800020]/10">
+          <span className="font-serif italic text-lg sm:text-xl font-black tracking-widest text-[#800020] dark:text-amber-300 uppercase bg-white/75 dark:bg-[#250818]/90 px-4 py-1.5 rounded-full shadow-md border border-[#800020]/10 dark:border-amber-500/20">
             {"Theresa's Festival of Life"}
           </span>
           <span className="flex h-3 w-3 relative">
@@ -434,33 +463,50 @@ export default function Page() {
           </span>
         </div>
 
-        {/* Ambient Synthesizer Custom Controller */}
-        <div className="flex items-center gap-3 bg-white/80 px-4 py-2 rounded-full border border-[#800020]/10 shadow-sm">
-          {isPlaying && (
-            <div className="flex gap-0.5 items-end h-3 px-1">
-              <span className="w-0.5 bg-[#800020] animate-[bounce_0.8s_infinite_100ms] h-full"></span>
-              <span className="w-0.5 bg-teal-500 animate-[bounce_0.8s_infinite_300ms] h-2.5"></span>
-              <span className="w-0.5 bg-amber-500 animate-[bounce_0.8s_infinite_200ms] h-3"></span>
-              <span className="w-0.5 bg-orange-500 animate-[bounce_0.8s_infinite_400ms] h-2"></span>
-            </div>
-          )}
-          <button 
-            onClick={toggleMusic}
-            id="toggle-audio-btn"
-            className="flex items-center gap-2 text-[10px] font-black tracking-[0.15em] text-[#800020] hover:text-teal-600 transition-colors"
+        {/* Header Control Buttons Row */}
+        <div className="flex items-center gap-3">
+          {/* Dynamic Light/Dark Theme Switcher */}
+          <button
+            onClick={toggleDarkMode}
+            id="toggle-dark-mode"
+            className="p-2 sm:p-2.5 bg-white/80 dark:bg-[#250818]/90 border border-[#800020]/10 dark:border-amber-500/20 rounded-full shadow-md text-[#800020] dark:text-amber-300 hover:scale-[1.06] transition-transform duration-200"
+            title="Toggle Theme Mode"
           >
-            {isPlaying ? (
-              <>
-                <Volume2 size={13} className="text-teal-600 animate-pulse" />
-                <span>SOUNDTRACK ACTIVE</span>
-              </>
+            {darkMode ? (
+              <Sun size={15} className="animate-[spin_6s_linear_infinite]" />
             ) : (
-              <>
-                <VolumeX size={13} className="text-gray-400" />
-                <span>PLAY SOUNDTRACK</span>
-              </>
+              <Moon size={15} />
             )}
           </button>
+
+          {/* Ambient Synthesizer Custom Controller */}
+          <div className="flex items-center gap-3 bg-white/80 dark:bg-[#250818]/90 px-4 py-2 rounded-full border border-[#800020]/10 dark:border-amber-500/20 shadow-sm">
+            {isPlaying && (
+              <div className="flex gap-0.5 items-end h-3 px-1">
+                <span className="w-0.5 bg-[#800020] animate-[bounce_0.8s_infinite_100ms] h-full"></span>
+                <span className="w-0.5 bg-teal-500 animate-[bounce_0.8s_infinite_300ms] h-2.5"></span>
+                <span className="w-0.5 bg-amber-500 animate-[bounce_0.8s_infinite_200ms] h-3"></span>
+                <span className="w-0.5 bg-orange-500 animate-[bounce_0.8s_infinite_400ms] h-2"></span>
+              </div>
+            )}
+            <button 
+              onClick={toggleMusic}
+              id="toggle-audio-btn"
+              className="flex items-center gap-2 text-[10px] font-black tracking-[0.15em] text-[#800020] dark:text-amber-300 hover:text-teal-600 dark:hover:text-amber-200 transition-colors"
+            >
+              {isPlaying ? (
+                <>
+                  <Volume2 size={13} className="text-teal-600 dark:text-teal-400 animate-pulse" />
+                  <span>SOUNDTRACK ACTIVE</span>
+                </>
+              ) : (
+                <>
+                  <VolumeX size={13} className="text-gray-400 dark:text-gray-500" />
+                  <span>PLAY SOUNDTRACK</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -484,11 +530,11 @@ export default function Page() {
                 className="relative group cursor-pointer inline-block"
               >
                 {/* Immersive 3D styled celebration envelope styled in rich royal details */}
-                <div className="w-72 h-44 sm:w-85 sm:h-52 bg-white rounded-2xl shadow-2xl border-4 border-[#800020]/30 relative flex items-center justify-center p-4 transform group-hover:-translate-y-3 transition-transform duration-500 ease-out">
+                <div className="w-72 h-44 sm:w-85 sm:h-52 bg-white dark:bg-[#1E0814] rounded-2xl shadow-2xl border-4 border-[#800020]/30 dark:border-amber-500/25 relative flex items-center justify-center p-4 transform group-hover:-translate-y-3 transition-transform duration-500 ease-out">
                   
                   {/* Vibrant Colorful Top Envelope Trim representing favorite burgundy, teal, orange, violet hues */}
                   <div className="absolute top-0 inset-x-0 h-4 bg-gradient-to-r from-[#800020] via-purple-600 via-teal-500 via-amber-400 via-orange-500 to-[#800020] rounded-t-xl opacity-90"></div>
-                  <div className="absolute top-4 inset-x-0 h-1/2 border-b border-dashed border-[#800020]/20 rounded-t-lg"></div>
+                  <div className="absolute top-4 inset-x-0 h-1/2 border-b border-dashed border-[#800020]/20 dark:border-amber-500/10 rounded-t-lg"></div>
                   
                   {/* Majestic Golden Sealing Wax */}
                   <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#800020] via-purple-900 to-[#800020] shadow-xl flex flex-col items-center justify-center relative z-10 transition-transform duration-300 group-hover:scale-110 active:scale-95 border-2 border-amber-300">
@@ -502,7 +548,7 @@ export default function Page() {
                   </div>
 
                   <div className="absolute bottom-3 inset-x-0 text-center">
-                    <span className="font-sans text-[10px] uppercase tracking-[0.3em] font-black text-[#800020] animate-pulse">
+                    <span className="font-sans text-[10px] uppercase tracking-[0.3em] font-black text-[#800020] dark:text-amber-300 animate-pulse">
                       Tap Royal 71 Seal to Open
                     </span>
                   </div>
@@ -510,15 +556,15 @@ export default function Page() {
               </div>
 
               {/* Envelope Card Header Typography */}
-              <div className="mt-8 space-y-3 bg-white/85 p-6 rounded-2xl backdrop-blur-md border border-white/40 max-w-md mx-auto shadow-xl">
-                <h1 className="font-serif text-3xl sm:text-4xl font-black text-[#800020] tracking-wide leading-tight">
+              <div className="mt-8 space-y-3 bg-white/85 dark:bg-[#1E0814]/95 p-6 rounded-2xl backdrop-blur-md border border-white/40 dark:border-amber-500/10 max-w-md mx-auto shadow-xl">
+                <h1 className="font-serif text-3xl sm:text-4xl font-black text-[#800020] dark:text-amber-300 tracking-wide leading-tight">
                   Happy Birthday, <br />
-                  <span className="block font-cursive text-deep-pink text-4xl sm:text-5xl mt-1 text-amber-500 font-medium">Theresa</span>
+                  <span className="block font-cursive text-deep-pink text-4xl sm:text-5xl mt-1 text-amber-500 font-medium animate-pulse">Theresa</span>
                 </h1>
-                <p className="text-[10px] uppercase font-bold tracking-[0.25em] text-teal-600">
+                <p className="text-[10px] uppercase font-bold tracking-[0.25em] text-teal-600 dark:text-teal-400">
                   A Royal Digital Memory Box
                 </p>
-                <p className="text-xs font-semibold text-gray-700 leading-relaxed max-w-sm mx-auto">
+                <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 leading-relaxed max-w-sm mx-auto">
                   Proverbs 31:10 – “Who can find a virtuous woman? For her price is far above rubies” emphasizes her incomparable value and excellence
                 </p>
               </div>
@@ -533,19 +579,19 @@ export default function Page() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.98, opacity: 0 }}
               transition={{ duration: 0.7 }}
-              className="w-full max-w-4xl h-[650px] sm:h-[720px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border-4 border-[#800020] relative"
+              className="w-full max-w-4xl h-[650px] sm:h-[720px] bg-white dark:bg-[#180510] rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border-4 border-[#800020] dark:border-amber-500/60 relative"
             >
               
               {/* Notebook Centre Spine Highlight (For depth accentuation) */}
               <div className="hidden md:block absolute left-[300px] top-0 bottom-0 w-6 bg-gradient-to-r from-black/[0.05] via-transparent to-black/[0.02] z-20 pointer-events-none"></div>
 
               {/* LEFT INDEX COLUMN: Profile & Notebook Sidebar Nav */}
-              <div className="w-full md:w-[300px] bg-gradient-to-b from-white to-[#FAF6F3] border-b md:border-b-0 md:border-r border-[#800020]/20 p-6 flex flex-col justify-between shrink-0">
+              <div className="w-full md:w-[300px] bg-gradient-to-b from-white to-[#FAF6F3] dark:from-[#200A15] dark:to-[#180510] border-b md:border-b-0 md:border-r border-[#800020]/20 dark:border-amber-500/15 p-6 flex flex-col justify-between shrink-0">
                 
                 {/* Profile Portrait card */}
                 <div className="space-y-4">
-                  <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden relative border-4 border-amber-400 p-1 bg-white shadow-lg group">
-                    <div className="w-full h-full rounded-xl overflow-hidden relative bg-slate-50">
+                  <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden relative border-4 border-amber-400 p-1 bg-white dark:bg-[#200A15] shadow-lg group">
+                    <div className="w-full h-full rounded-xl overflow-hidden relative bg-slate-50 dark:bg-zinc-900">
                       <img 
                         src="https://res.cloudinary.com/savvyone/image/upload/v1781153246/TopPhoto1_zkhbrj.jpg" 
                         alt="Queen Theresa Portrait" 
@@ -564,10 +610,10 @@ export default function Page() {
 
                   <div className="text-center md:text-left space-y-1">
                     <div className="flex items-center justify-center md:justify-start gap-1">
-                      <h2 className="font-serif text-2xl font-black tracking-wide text-[#800020]">Theresa</h2>
+                      <h2 className="font-serif text-2xl font-black tracking-wide text-[#800020] dark:text-amber-300">Theresa</h2>
                       <span className="text-lg">✨</span>
                     </div>
-                    <p className="text-[10px] font-black text-teal-600 uppercase tracking-widest flex items-center justify-center md:justify-start gap-1">
+                    <p className="text-[10px] font-black text-teal-600 dark:text-teal-450 uppercase tracking-widest flex items-center justify-center md:justify-start gap-1">
                       <Sparkles size={11} className="animate-pulse" />
                       <span>Our Bright & Beautiful Queen</span>
                     </p>
@@ -585,7 +631,7 @@ export default function Page() {
                         className={`grow md:grow-0 text-left px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center md:justify-start gap-3 transition-all duration-300 ${
                           isSelected 
                             ? `${tab.activeBg} ${tab.activeText} font-black shadow-md scale-[1.03] ring-1 ring-[#800020]/20` 
-                            : `text-gray-700 hover:bg-[#800020]/5 ${tab.hoverBg}`
+                            : `text-gray-700 dark:text-gray-300 hover:bg-[#800020]/5 dark:hover:bg-amber-500/10 ${tab.hoverBg}`
                         }`}
                       >
                         <span className="text-base">{tab.icon}</span>
@@ -596,10 +642,10 @@ export default function Page() {
                 </nav>
 
                 {/* Back to envelope trigger */}
-                <div className="hidden md:block pt-4 border-t border-[#800020]/10">
+                <div className="hidden md:block pt-4 border-t border-[#800020]/10 dark:border-amber-500/15">
                   <button 
                     onClick={() => setIsOpen(false)}
-                    className="text-[10px] uppercase tracking-widest font-black text-[#800020] hover:text-[#14B8A6] flex items-center gap-2 transition-colors duration-200"
+                    className="text-[10px] uppercase tracking-widest font-black text-[#800020] dark:text-amber-300 hover:text-[#14B8A6] dark:hover:text-amber-200 flex items-center gap-2 transition-colors duration-200"
                   >
                     ◀ Close Envelope
                   </button>
@@ -607,7 +653,7 @@ export default function Page() {
               </div>
 
               {/* RIGHT PAGE COLUMN: Dynamic Page Module Rendering */}
-              <div className="flex-grow p-5 sm:p-10 flex flex-col justify-between overflow-y-auto min-h-0 bg-white">
+              <div className="flex-grow p-5 sm:p-10 flex flex-col justify-between overflow-y-auto min-h-0 bg-white dark:bg-[#1E0814]">
                 
                 {/* Active Dynamic Page Stage */}
                 <div className="flex-grow flex flex-col min-h-0">
@@ -623,16 +669,16 @@ export default function Page() {
                       </div>
 
                       <div className="space-y-3">
-                        <p className="text-xs uppercase tracking-[0.3em] text-[#800020] font-black">Happy Birthday Tribute</p>
-                        <h1 className="font-serif text-4xl sm:text-6xl font-black text-[#800020] tracking-wide leading-tight">
+                        <p className="text-xs uppercase tracking-[0.3em] text-[#800020] dark:text-amber-400 font-black">Happy Birthday Tribute</p>
+                        <h1 className="font-serif text-4xl sm:text-6xl font-black text-[#800020] dark:text-amber-300 tracking-wide leading-tight">
                           Dearest <span className="font-cursive font-normal text-amber-500 block mt-2 text-5xl sm:text-6xl">Theresa</span>
                         </h1>
                       </div>
 
                       <div className="w-48 h-1.5 bg-gradient-to-r from-purple-500 via-teal-500 via-amber-400 via-orange-500 to-[#800020] rounded-full shadow-inner"></div>
 
-                      <p className="text-base sm:text-lg font-serif italic text-gray-700 max-w-sm leading-relaxed">
-                        {"\"May your days be dressed in comfort, your spirit enveloped in peace, and your coming year blessed with boundless love.\""}
+                      <p className="text-base sm:text-lg font-serif italic text-gray-700 dark:text-gray-300 max-w-sm leading-relaxed">
+                        {"Psalm 118:24: \"This is the day that the Lord has made; let us rejoice and be glad in it.\" A reminder to celebrate the gift of life and the joy of another year."}
                       </p>
 
                       <button 
@@ -647,9 +693,9 @@ export default function Page() {
                   {/* --- PAGE 1: TRIBUTE LETTER & AI POETRY ENGINE --- */}
                   {currentPage === 1 && (
                     <div className="flex flex-col h-full animate-[fadeIn_0.5s_ease-out]">
-                      <div className="border-b-2 border-purple-100 pb-3 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="border-b-2 border-purple-100 dark:border-purple-950/20 pb-3 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
-                          <h3 className="font-serif text-2xl font-black text-purple-900 flex items-center gap-2">
+                          <h3 className="font-serif text-2xl font-black text-purple-900 dark:text-amber-300 flex items-center gap-2">
                             <span>{isCreatingPoem ? "Custom AI Poetry" : "A Devoted Blessing"}</span>
                             <Sparkles size={16} className="text-amber-500" />
                           </h3>
@@ -661,7 +707,7 @@ export default function Page() {
                         {/* Toggle between Static Letter and AI Poet */}
                         <button
                           onClick={() => setIsCreatingPoem(!isCreatingPoem)}
-                          className="text-xs font-bold tracking-wider px-4 py-2 rounded-full border-2 border-purple-500/30 bg-[#FAF6F5] hover:bg-purple-700 hover:text-white hover:border-purple-700 text-purple-800 transition-all flex items-center justify-center gap-1.5 self-start shadow-sm"
+                          className="text-xs font-bold tracking-wider px-4 py-2 rounded-full border-2 border-purple-500/30 dark:border-amber-500/15 bg-[#FAF6F5] dark:bg-[#200A15]/80 hover:bg-purple-700 dark:hover:bg-purple-800 hover:text-white hover:border-purple-700 dark:hover:border-purple-850 text-purple-800 dark:text-amber-300 transition-all flex items-center justify-center gap-1.5 self-start shadow-sm"
                         >
                           {isCreatingPoem ? (
                             <>
@@ -679,8 +725,8 @@ export default function Page() {
                       
                       {!isCreatingPoem ? (
                         // CLASSIC LETTER VIEW
-                        <div className="flex-grow overflow-y-auto pr-2 space-y-4 font-serif text-base text-gray-800 leading-relaxed italic max-h-[360px] sm:max-h-[400px] custom-scrollbar">
-                          <p className="not-italic font-sans text-xs tracking-widest text-[#800020] uppercase font-black">To Our Beloved Theresa,</p>
+                        <div className="flex-grow overflow-y-auto pr-2 space-y-4 font-serif text-base text-gray-800 dark:text-gray-300 leading-relaxed italic max-h-[360px] sm:max-h-[400px] custom-scrollbar">
+                          <p className="not-italic font-sans text-xs tracking-widest text-[#800020] dark:text-amber-400 uppercase font-black">To Our Beloved Theresa,</p>
                           
                           <p>
                             On this monumental day, we pause to celebrate the magnificent light you represent in our lives. Your elegance is not merely in how you walk through the world, but in the peaceful sanctuary you build for everyone lucky enough to be near you.
@@ -705,17 +751,17 @@ export default function Page() {
                               </p>
                               
                               <div className="space-y-1">
-                                <label className="block text-[10px] uppercase tracking-widest text-[#800020] font-black">{"Theresa's Distinctive Attributes"}</label>
+                                <label className="block text-[10px] uppercase tracking-widest text-[#800020] dark:text-amber-400 font-black">{"Theresa's Distinctive Attributes"}</label>
                                 <textarea
                                   value={poemTraits}
                                   onChange={(e) => setPoemTraits(e.target.value)}
                                   placeholder="e.g., her quiet wisdom, her warm, welcoming smile, her favorite rich colors, her elegant tiara, and her devotion to family"
-                                  className="w-full text-xs p-3 bg-slate-50 border-2 border-purple-100 rounded-xl focus:outline-none focus:border-purple-600 transition-all h-20 resize-none font-sans"
+                                  className="w-full text-xs p-3 bg-slate-50 dark:bg-zinc-900 border-2 border-purple-100 dark:border-purple-950/45 text-gray-800 dark:text-gray-100 rounded-xl focus:outline-none focus:border-purple-600 transition-all h-20 resize-none font-sans"
                                 />
                               </div>
 
                               <div className="space-y-1">
-                                <label className="block text-[10px] uppercase tracking-widest text-[#800020] font-black">Aesthetic Tone</label>
+                                <label className="block text-[10px] uppercase tracking-widest text-[#800020] dark:text-amber-400 font-black">Aesthetic Tone</label>
                                 <div className="grid grid-cols-3 gap-2">
                                   {[
                                     { label: "Elegant & Poetic", value: "elegant & poetic" },
@@ -729,7 +775,7 @@ export default function Page() {
                                       className={`py-1.5 px-2 rounded-md text-[10px] font-sans font-bold transition-all border ${
                                         poemTone === toneOption.value
                                           ? "bg-purple-600 border-purple-600 text-white font-extrabold"
-                                          : "border-gray-200 bg-white hover:bg-gray-50 text-gray-600"
+                                          : "border-gray-200 dark:border-zinc-805 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-850 text-gray-600 dark:text-gray-300"
                                       }`}
                                     >
                                       {toneOption.label}
@@ -760,12 +806,12 @@ export default function Page() {
                           ) : (
                             // Poem Composition results
                             <div className="space-y-4 animate-[fadeIn_0.4s_ease-out] p-1">
-                              <div className="bg-gradient-to-br from-purple-50/50 via-white to-amber-50/30 p-5 rounded-2xl border-2 border-purple-100 shadow-inner relative">
-                                <div className="absolute top-2 right-2 text-[10px] text-purple-600 font-sans font-bold flex items-center gap-1">
+                              <div className="bg-gradient-to-br from-purple-50/50 via-white to-amber-50/30 dark:from-[#200A15]/40 dark:via-[#180510] dark:to-[#1E0814]/30 p-5 rounded-2xl border-2 border-purple-100 dark:border-purple-950/25 shadow-inner relative">
+                                <div className="absolute top-2 right-2 text-[10px] text-purple-600 dark:text-amber-400 font-sans font-bold flex items-center gap-1">
                                   <Sparkles size={11} className="animate-spin" />
                                   <span>Gemini AI Poetry</span>
                                 </div>
-                                <pre className="font-serif italic whitespace-pre-wrap text-sm text-[#1E0B14] leading-relaxed text-center font-medium max-h-[250px] overflow-y-auto custom-scrollbar">
+                                <pre className="font-serif italic whitespace-pre-wrap text-sm text-[#1E0B14] dark:text-gray-300 leading-relaxed text-center font-medium max-h-[250px] overflow-y-auto custom-scrollbar">
                                   {generatedPoem}
                                 </pre>
                               </div>
@@ -777,7 +823,7 @@ export default function Page() {
                                     setCurrentPage(3); // transition to guestbook
                                     showStatus("success", "Poem successfully drafted into your Guestbook wish box!");
                                   }}
-                                  className="flex-1 py-2.5 border-2 border-purple-600 text-purple-600 hover:bg-purple-50 text-xs font-black tracking-widest uppercase rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5"
+                                  className="flex-1 py-2.5 border-2 border-purple-600 dark:border-amber-500/40 text-purple-600 dark:text-amber-300 hover:bg-purple-50 dark:hover:bg-amber-500/10 text-xs font-black tracking-widest uppercase rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5"
                                 >
                                   <PenTool size={13} />
                                   <span>Use in Guestbook</span>
@@ -787,7 +833,7 @@ export default function Page() {
                                     setGeneratedPoem("");
                                     setPoemTraits("");
                                   }}
-                                  className="py-2.5 px-4 bg-purple-100 hover:bg-purple-200 text-purple-800 text-xs font-bold tracking-widest uppercase rounded-lg transition-all duration-200"
+                                  className="py-2.5 px-4 bg-purple-100 dark:bg-zinc-800 hover:bg-purple-200 dark:hover:bg-zinc-700 text-purple-800 dark:text-amber-300 text-xs font-bold tracking-widest uppercase rounded-lg transition-all duration-200"
                                 >
                                   Try Another
                                 </button>
@@ -802,10 +848,10 @@ export default function Page() {
                   {/* --- PAGE 2: MEMORY LANE (GALLERY) --- */}
                   {currentPage === 2 && (
                     <div className="flex flex-col h-full animate-[fadeIn_0.5s_ease-out]">
-                      <div className="border-b-2 border-teal-100 pb-3 mb-4">
-                        <h3 className="font-serif text-2xl font-black text-teal-900 flex items-center gap-2">
+                      <div className="border-b-2 border-teal-100 dark:border-teal-950/20 pb-3 mb-4">
+                        <h3 className="font-serif text-2xl font-black text-teal-900 dark:text-amber-300 flex items-center gap-2">
                           <span>Memory Lane</span>
-                          <Heart size={16} className="text-teal-600" />
+                          <Heart size={16} className="text-teal-600 dark:text-teal-450" />
                         </h3>
                         <p className="text-[10px] uppercase font-bold text-gray-400">Glimpses of beauty, joy, elegance and light</p>
                       </div>
@@ -817,9 +863,9 @@ export default function Page() {
                               key={index}
                               whileHover={{ y: -4 }}
                               onClick={() => setActivePhoto(photo)}
-                              className="bg-white p-2 border-2 border-teal-100/60 rounded-2xl shadow-md cursor-zoom-in group transition-shadow duration-300 hover:shadow-xl"
+                              className="bg-white dark:bg-[#200A15]/90 p-2 border-2 border-teal-100/60 dark:border-teal-950/20 rounded-2xl shadow-md cursor-zoom-in group transition-shadow duration-300 hover:shadow-xl"
                             >
-                              <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100 rounded-xl relative">
+                              <div className="aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-zinc-900 rounded-xl relative">
                                 <img 
                                   src={photo.url} 
                                   alt={photo.title} 
@@ -832,7 +878,7 @@ export default function Page() {
                                 />
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                               </div>
-                              <p className="text-[9px] font-sans font-bold text-teal-800 mt-2 truncate text-center uppercase tracking-wide">
+                              <p className="text-[9px] font-sans font-bold text-teal-800 dark:text-teal-400 mt-2 truncate text-center uppercase tracking-wide">
                                 {photo.title}
                               </p>
                             </motion.div>
@@ -845,10 +891,10 @@ export default function Page() {
                   {/* --- PAGE 3: GUESTBOOK & AI MESSAGE SENTIMENT POLISHER --- */}
                   {currentPage === 3 && (
                     <div className="flex flex-col h-full animate-[fadeIn_0.5s_ease-out]">
-                      <div className="border-b-2 border-[#800020]/20 pb-3 mb-4">
-                        <h3 className="font-serif text-2xl font-black text-[#800020] flex items-center gap-2">
+                      <div className="border-b-2 border-[#800020]/20 dark:border-amber-500/10 pb-3 mb-4">
+                        <h3 className="font-serif text-2xl font-black text-[#800020] dark:text-amber-300 flex items-center gap-2">
                           <span>Wishes Guestbook</span>
-                          <PenTool size={16} className="text-[#800020]" />
+                          <PenTool size={16} className="text-[#800020] dark:text-amber-400" />
                         </h3>
                         <p className="text-[10px] uppercase font-bold text-gray-400">Post heartfelt messages and upload beautiful memories instantly</p>
                       </div>
@@ -860,26 +906,26 @@ export default function Page() {
                         <form onSubmit={handleSubmitWish} className="lg:col-span-5 space-y-3 flex flex-col justify-between">
                           <div className="space-y-3">
                             <div>
-                              <label className="block text-[10px] uppercase tracking-widest text-[#800020] font-black mb-1">Your Name</label>
+                              <label className="block text-[10px] uppercase tracking-widest text-[#800020] dark:text-amber-400 font-black mb-1">Your Name</label>
                               <input 
                                 type="text"
                                 value={senderName}
                                 onChange={(e) => setSenderName(e.target.value)}
                                 placeholder="e.g., Sister Maria"
-                                className="w-full text-xs px-3.5 py-2 bg-slate-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:border-[#800020] focus:bg-white transition-all font-sans"
+                                className="w-full text-xs px-3.5 py-2 bg-slate-50 dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-xl focus:outline-none focus:border-[#800020] dark:focus:border-[#800020]/50 focus:bg-white dark:focus:bg-[#200A15]/40 text-gray-800 dark:text-gray-100 transition-all font-sans"
                               />
                             </div>
                             
                             <div>
                               <div className="flex justify-between items-center mb-1">
-                                <label className="block text-[10px] uppercase tracking-widest text-[#800020] font-black">Your blessing</label>
+                                <label className="block text-[10px] uppercase tracking-widest text-[#800020] dark:text-amber-400 font-black">Your blessing</label>
                                 
                                 {/* Gemini AI Message Polisher Trigger */}
                                 <button
                                   type="button"
                                   onClick={handlePolishWish}
                                   disabled={polishingWish || !messageText.trim()}
-                                  className="text-[9px] font-black tracking-wider text-[#800020] disabled:opacity-40 transition-all flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-400 hover:bg-[#800020] hover:text-white shadow-sm border border-[#800020]/10"
+                                  className="text-[9px] font-black tracking-wider text-[#800020] dark:text-gray-900 disabled:opacity-40 transition-all flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-400 hover:bg-[#800020] hover:text-white dark:hover:bg-amber-300 dark:hover:text-gray-800 shadow-sm border border-[#800020]/10"
                                   title="Type simple words, then hit to make it sound premium and professional!"
                                 >
                                   {polishingWish ? (
@@ -899,19 +945,19 @@ export default function Page() {
                                 value={messageText}
                                 onChange={(e) => setMessageText(e.target.value)}
                                 placeholder="Write your heartfelt birthday wishes or prayers here..."
-                                className="w-full text-xs p-3.5 bg-slate-50 border-2 border-gray-100 rounded-xl focus:outline-none focus:border-[#800020] focus:bg-white transition-all h-24 resize-none font-sans"
+                                className="w-full text-xs p-3.5 bg-slate-50 dark:bg-zinc-900 border-2 border-gray-100 dark:border-zinc-800 rounded-xl focus:outline-none focus:border-[#800020] dark:focus:border-[#800020]/50 focus:bg-white dark:focus:bg-[#200A15]/40 text-gray-800 dark:text-gray-100 transition-all h-24 resize-none font-sans"
                               />
                             </div>
 
                             {/* PHOTO ATTACHMENT */}
                             <div>
-                              <label className="block text-[10px] uppercase tracking-widest text-[#800020] font-black mb-1">
+                              <label className="block text-[10px] uppercase tracking-widest text-[#800020] dark:text-amber-400 font-black mb-1">
                                 Attach a Photo (Optional)
                               </label>
                               <div className="flex items-center gap-4">
-                                <label className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 border-2 border-dashed border-gray-300 rounded-xl transition-all">
-                                  <Camera size={16} className="text-[#800020]" />
-                                  <span className="text-[10px] font-bold text-gray-600">Choose file</span>
+                                <label className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 border-2 border-dashed border-gray-300 dark:border-zinc-800 rounded-xl transition-all">
+                                  <Camera size={16} className="text-[#800020] dark:text-amber-300" />
+                                  <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">Choose file</span>
                                   <input
                                     type="file"
                                     accept="image/*"
@@ -921,7 +967,7 @@ export default function Page() {
                                 </label>
                                 {uploadLoading && <span className="text-[10px] text-gray-500 animate-pulse">Compressing...</span>}
                                 {attachedPhoto && (
-                                  <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-200">
+                                  <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800">
                                     <img src={attachedPhoto} alt="Attached miniature" className="w-full h-full object-cover animate-heartPulse" />
                                     <button
                                       type="button"
@@ -945,15 +991,15 @@ export default function Page() {
                         </form>
 
                         {/* RIGHT: REAL-TIME WISHES BOARD */}
-                        <div className="lg:col-span-7 flex flex-col min-h-0 bg-slate-50/50 rounded-2xl border border-gray-100 p-4">
-                          <p className="text-[10px] uppercase tracking-wider font-extrabold text-teal-700 mb-3 flex items-center gap-1.5">
+                        <div className="lg:col-span-7 flex flex-col min-h-0 bg-slate-50/50 dark:bg-zinc-950/20 rounded-2xl border border-gray-100 dark:border-zinc-800/60 p-4">
+                          <p className="text-[10px] uppercase tracking-wider font-extrabold text-teal-700 dark:text-teal-400 mb-3 flex items-center gap-1.5">
                             <span className="h-2 w-2 rounded-full bg-teal-500 animate-ping"></span>
                             <span>Live Wishes Board ({wishes.length})</span>
                           </p>
 
                           <div className="flex-grow overflow-y-auto max-h-[300px] sm:max-h-[340px] pr-2 space-y-3 custom-scrollbar">
                             {wishes.length === 0 ? (
-                              <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-400">
+                              <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-400 dark:text-gray-500">
                                 <Star size={24} className="stroke-1 animate-pulse text-amber-400 mb-2" />
                                 <p className="text-xs font-medium">No blessings posted yet. Be the first to leave a sparkly wish!</p>
                               </div>
@@ -963,21 +1009,21 @@ export default function Page() {
                                   key={wish.id}
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
-                                  className="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-2.5"
+                                  className="bg-white dark:bg-[#15040B] p-3.5 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-800/40 flex flex-col gap-2.5"
                                 >
                                   <div className="flex justify-between items-start">
-                                    <h4 className="font-serif text-sm font-black text-[#800020]">{wish.name}</h4>
-                                    <span className="text-[9px] font-mono text-gray-400">
+                                    <h4 className="font-serif text-sm font-black text-[#800020] dark:text-amber-300">{wish.name}</h4>
+                                    <span className="text-[9px] font-mono text-gray-400 dark:text-gray-500">
                                       {wish.createdAt?.seconds 
                                         ? new Date(wish.createdAt.seconds * 1000).toLocaleDateString()
                                         : "recently"}
                                     </span>
                                   </div>
-                                  <p className="text-xs text-gray-700 font-medium leading-relaxed font-serif italic">
+                                  <p className="text-xs text-gray-700 dark:text-gray-300 font-medium leading-relaxed font-serif italic">
                                     "{wish.message}"
                                   </p>
                                   {wish.photoBase64 && (
-                                    <div className="w-full max-w-[200px] rounded-lg overflow-hidden border border-gray-100 bg-slate-50 flex items-center justify-center p-1">
+                                    <div className="w-full max-w-[200px] rounded-lg overflow-hidden border border-gray-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 flex items-center justify-center p-1">
                                       <img
                                         src={wish.photoBase64}
                                         alt={`Memory from ${wish.name}`}
@@ -996,20 +1042,20 @@ export default function Page() {
                 </div>
 
                 {/* Notebook Navigation Footer Indicators */}
-                <div className="mt-6 flex justify-between items-center text-[10px] font-bold text-gray-400 font-mono border-t border-gray-100 pt-4">
+                <div className="mt-6 flex justify-between items-center text-[10px] font-bold text-gray-400 dark:text-gray-500 font-mono border-t border-gray-100 dark:border-zinc-800 pt-4">
                   <span>PAGE {currentPage + 1} OF 4</span>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                       disabled={currentPage === 0}
-                      className="p-1 px-2.5 rounded hover:bg-gray-100 disabled:opacity-30 transition-colors text-[#800020]"
+                      className="p-1 px-2.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 disabled:opacity-30 transition-colors text-[#800020] dark:text-amber-300"
                     >
                       PREV
                     </button>
                     <button
                       onClick={() => setCurrentPage(prev => Math.min(3, prev + 1))}
                       disabled={currentPage === 3}
-                      className="p-1 px-2.5 rounded hover:bg-gray-100 disabled:opacity-30 transition-colors text-[#800020]"
+                      className="p-1 px-2.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 disabled:opacity-30 transition-colors text-[#800020] dark:text-amber-300"
                     >
                       NEXT
                     </button>
@@ -1036,16 +1082,16 @@ export default function Page() {
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white p-3 sm:p-5 rounded-2xl max-w-2xl w-full flex flex-col gap-4 shadow-2xl relative"
+              className="bg-white dark:bg-[#1E0814] p-3 sm:p-5 rounded-2xl max-w-2xl w-full flex flex-col gap-4 shadow-2xl relative border dark:border-amber-500/10"
             >
               <button
                 onClick={() => setActivePhoto(null)}
-                className="absolute top-3 right-3 bg-white/80 hover:bg-red-500 hover:text-white rounded-full p-1.5 transition-colors shadow z-10 text-gray-700"
+                className="absolute top-3 right-3 bg-white/80 dark:bg-zinc-800 dark:text-gray-350 hover:bg-red-500 hover:text-white rounded-full p-1.5 transition-colors shadow z-10 text-gray-700"
               >
                 <X size={18} />
               </button>
 
-              <div className="aspect-[4/3] w-full bg-slate-50 rounded-xl overflow-hidden relative shadow-inner">
+              <div className="aspect-[4/3] w-full bg-slate-50 dark:bg-zinc-900 rounded-xl overflow-hidden relative shadow-inner">
                 <img
                   src={activePhoto.url}
                   alt={activePhoto.title}
@@ -1058,10 +1104,10 @@ export default function Page() {
               </div>
 
               <div className="text-center space-y-1">
-                <h4 className="font-serif text-lg font-black text-[#800020] uppercase tracking-wide">
+                <h4 className="font-serif text-lg font-black text-[#800020] dark:text-amber-300 uppercase tracking-wide">
                   {activePhoto.title}
                 </h4>
-                <p className="text-[10px] font-bold text-teal-600 uppercase tracking-widest">
+                <p className="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest">
                   Memory Lane Collection
                 </p>
               </div>
@@ -1079,8 +1125,8 @@ export default function Page() {
             exit={{ y: 50, opacity: 0 }}
             className={`fixed bottom-6 right-6 p-4 rounded-xl shadow-2xl border-2 text-xs font-bold leading-relaxed max-w-sm z-50 flex items-center gap-3 ${
               submitStatus.type === "success"
-                ? "bg-emerald-50 border-emerald-500/30 text-emerald-800"
-                : "bg-rose-50 border-rose-500/30 text-rose-800"
+                ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-500/30 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300"
+                : "bg-rose-50 dark:bg-rose-950/20 border-rose-500/30 dark:border-rose-500/20 text-rose-800 dark:text-rose-300"
             }`}
           >
             <span className="text-xl">
@@ -1091,7 +1137,7 @@ export default function Page() {
         )}
       </AnimatePresence>
 
-      <footer className="w-full text-center py-4 text-[10px] font-bold text-gray-400 font-mono z-20">
+      <footer className="w-full text-center py-4 text-[10px] font-bold text-gray-400 dark:text-gray-500 font-mono z-20">
         © {new Date().getFullYear()} THERESA'S FESTIVAL OF LIFE • POWERED BY AI STUDIO
       </footer>
     </div>
