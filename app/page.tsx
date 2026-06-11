@@ -628,7 +628,7 @@ export default function Page() {
                   </div>
 
                   {/* Desktop large portrait */}
-                  <div className="hidden md:block w-full aspect-[4/3] rounded-2xl overflow-hidden relative border-4 border-amber-400 p-1 bg-white dark:bg-[#200A15] shadow-lg group mb-4">
+                  <div className="hidden md:block w-full aspect-[3/4] rounded-2xl overflow-hidden relative border-4 border-amber-400 p-1 bg-white dark:bg-[#200A15] shadow-lg group mb-4">
                     <div className="w-full h-full rounded-xl overflow-hidden relative bg-slate-50 dark:bg-zinc-900">
                       <img 
                         src="https://res.cloudinary.com/savvyone/image/upload/v1781153246/TopPhoto1_zkhbrj.jpg" 
