@@ -603,7 +603,7 @@ export default function Page() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.98, opacity: 0 }}
               transition={{ duration: 0.7 }}
-              className="w-full max-w-4xl h-[650px] sm:h-[720px] bg-white dark:bg-[#180510] rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border-4 border-[#800020] dark:border-amber-500/60 relative"
+              className="w-full max-w-6xl min-h-[600px] h-auto md:h-[820px] bg-white dark:bg-[#180510] rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border-4 border-[#800020] dark:border-amber-500/60 relative"
             >
               
               {/* Notebook Centre Spine Highlight (For depth accentuation) */}
@@ -613,8 +613,22 @@ export default function Page() {
               <div className="w-full md:w-[300px] bg-gradient-to-b from-white to-[#FAF6F3] dark:from-[#200A15] dark:to-[#180510] border-b md:border-b-0 md:border-r border-[#800020]/20 dark:border-amber-500/15 p-6 flex flex-col justify-between shrink-0">
                 
                 {/* Profile Portrait card */}
-                <div className="space-y-4">
-                  <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden relative border-4 border-amber-400 p-1 bg-white dark:bg-[#200A15] shadow-lg group">
+                <div className="flex items-center md:block gap-4 border-b border-[#800020]/10 dark:border-amber-500/10 pb-4 md:pb-0 md:border-b-0">
+                  {/* Mobile small avatar */}
+                  <div className="block md:hidden w-12 h-12 rounded-full overflow-hidden border-2 border-amber-400 shadow shrink-0">
+                    <img 
+                      src="https://res.cloudinary.com/savvyone/image/upload/v1781153246/TopPhoto1_zkhbrj.jpg" 
+                      alt="Queen Theresa Portrait" 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                      onError={(e: any) => {
+                        e.target.src = "https://picsum.photos/seed/portrait/800/600";
+                      }}
+                    />
+                  </div>
+
+                  {/* Desktop large portrait */}
+                  <div className="hidden md:block w-full aspect-[4/3] rounded-2xl overflow-hidden relative border-4 border-amber-400 p-1 bg-white dark:bg-[#200A15] shadow-lg group mb-4">
                     <div className="w-full h-full rounded-xl overflow-hidden relative bg-slate-50 dark:bg-zinc-900">
                       <img 
                         src="https://res.cloudinary.com/savvyone/image/upload/v1781153246/TopPhoto1_zkhbrj.jpg" 
@@ -632,13 +646,13 @@ export default function Page() {
                     </div>
                   </div>
 
-                  <div className="text-center md:text-left space-y-1">
-                    <div className="flex items-center justify-center md:justify-start gap-1">
-                      <h2 className="font-serif text-2xl font-black tracking-wide text-[#800020] dark:text-amber-300">Theresa</h2>
-                      <span className="text-lg">✨</span>
+                  <div className="text-left md:text-left space-y-1">
+                    <div className="flex items-center gap-1">
+                      <h2 className="font-serif text-xl md:text-2xl font-black tracking-wide text-[#800020] dark:text-amber-300">Theresa</h2>
+                      <span className="text-base md:text-lg">✨</span>
                     </div>
-                    <p className="text-[10px] font-black text-teal-600 dark:text-teal-450 uppercase tracking-widest flex items-center justify-center md:justify-start gap-1">
-                      <Sparkles size={11} className="animate-pulse" />
+                    <p className="text-[9px] md:text-[10px] font-black text-teal-600 dark:text-teal-450 uppercase tracking-widest flex items-center gap-1">
+                      <Sparkles size={10} className="animate-pulse" />
                       <span>Our Bright & Beautiful Queen</span>
                     </p>
                   </div>
@@ -1013,15 +1027,43 @@ export default function Page() {
                             Send Blessing ➔
                           </button>
                         </form>
-
-                        {/* RIGHT: REAL-TIME WISHES BOARD */}
+                                 {/* RIGHT: REAL-TIME WISHES BOARD */}
                         <div className="lg:col-span-7 flex flex-col min-h-0 bg-slate-50/50 dark:bg-zinc-950/20 rounded-2xl border border-gray-100 dark:border-zinc-800/60 p-4">
                           <p className="text-[10px] uppercase tracking-wider font-extrabold text-teal-700 dark:text-teal-400 mb-3 flex items-center gap-1.5">
                             <span className="h-2 w-2 rounded-full bg-teal-500 animate-ping"></span>
                             <span>Live Wishes Board ({wishes.length})</span>
                           </p>
 
-                          <div className="flex-grow overflow-y-auto max-h-[300px] sm:max-h-[340px] pr-2 space-y-3 custom-scrollbar">
+                          {/* --- SHARED GUEST MOMENTS STRIP --- */}
+                          {(() => {
+                            const wishesWithPhotos = wishes.filter(w => w.photoBase64);
+                            if (wishesWithPhotos.length === 0) return null;
+                            return (
+                              <div className="mb-4 bg-white dark:bg-[#15040B] p-2.5 rounded-xl border border-gray-100 dark:border-zinc-800/40 shadow-sm">
+                                <p className="text-[9px] uppercase tracking-wider font-extrabold text-[#800020] dark:text-amber-450 mb-1.5">
+                                  Shared Photos ({wishesWithPhotos.length})
+                                  <span className="text-[8px] font-normal text-gray-400 dark:text-gray-500 lowercase ml-1">(click to expand)</span>
+                                </p>
+                                <div className="flex gap-2 overflow-x-auto pb-1.5 custom-scrollbar">
+                                  {wishesWithPhotos.map((wish) => (
+                                    <button
+                                      key={wish.id}
+                                      type="button"
+                                      onClick={() => setActivePhoto({ url: wish.photoBase64, title: "Memory from " + wish.name, fallbackUrl: "" })}
+                                      className="w-12 h-12 rounded-lg overflow-hidden border border-amber-400/50 hover:border-amber-400 shrink-0 hover:scale-105 active:scale-95 transition-all shadow-sm relative group"
+                                    >
+                                      <img src={wish.photoBase64} className="w-full h-full object-cover" />
+                                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <span className="text-[7px] text-white font-bold tracking-widest uppercase">Zoom</span>
+                                      </div>
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })()}
+
+                          <div className="flex-grow overflow-y-auto max-h-[380px] sm:max-h-[460px] pr-2 space-y-3 custom-scrollbar">
                             {wishes.length === 0 ? (
                               <div className="h-full flex flex-col items-center justify-center text-center p-6 text-gray-400 dark:text-gray-500">
                                 <Star size={24} className="stroke-1 animate-pulse text-amber-400 mb-2" />
@@ -1051,7 +1093,8 @@ export default function Page() {
                                       <img
                                         src={wish.photoBase64}
                                         alt={`Memory from ${wish.name}`}
-                                        className="w-full h-auto object-contain rounded"
+                                        className="w-full h-auto object-contain rounded cursor-zoom-in hover:opacity-95 transition-opacity"
+                                        onClick={() => setActivePhoto({ url: wish.photoBase64, title: "Memory from " + wish.name, fallbackUrl: "" })}
                                       />
                                     </div>
                                   )}
