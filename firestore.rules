@@ -26,11 +26,12 @@ service cloud.firestore {
     // Wish validation helper (Pillar 2: Validation Blueprints & Anti-Update-Gap)
     function isValidWish(data) {
       return data.keys().hasAll(['name', 'message', 'recipient', 'createdAt'])
-        && data.keys().size() >= 4
+        && data.keys().hasOnly(['name', 'message', 'recipient', 'createdAt', 'photoBase64'])
         && data.name is string && data.name.size() > 0 && data.name.size() <= 100
         && data.message is string && data.message.size() > 0 && data.message.size() <= 5000
         && data.recipient is string && (data.recipient == 'theresa' || data.recipient == 'therese')
-        && (data.createdAt == null || data.createdAt is timestamp || data.createdAt == request.time);
+        && data.createdAt == request.time
+        && (!('photoBase64' in data) || data.photoBase64 == null || (data.photoBase64 is string && data.photoBase64.size() <= 200000));
     }
 
     // MATCH wishes subcollection under artifacts (Pillar 3: Path Variable Hardening)
@@ -44,5 +45,11 @@ service cloud.firestore {
       // Prevent deleting or updating other people's wishes for safety
       allow update, delete: if false;
     }
+
+    // Allow connection testing path publicly
+    match /test/connection {
+      allow read: if true;
+    }
   }
 }
+

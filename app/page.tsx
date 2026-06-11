@@ -8,6 +8,7 @@ import {
   onSnapshot, 
   serverTimestamp 
 } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import { 
   Volume2, 
   VolumeX, 
@@ -129,6 +130,7 @@ export default function Page() {
   const [currentPage, setCurrentPage] = useState(0); // 0: Cover, 1: Tribute, 2: Gallery, 3: Guestbook
   const [wishes, setWishes] = useState<any[]>([]);
   const [activePhoto, setActivePhoto] = useState<any | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Audio state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -149,6 +151,18 @@ export default function Page() {
   const [generatedPoem, setGeneratedPoem] = useState("");
   const [generatingPoem, setGeneratingPoem] = useState(false);
 
+  // Listen for Firebase Auth state changes
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+    });
+    return () => unsubscribeAuth();
+  }, []);
+
   // Initialize Connection Testing and Anonymous Auth on Mount
   useEffect(() => {
     testConnection();
@@ -157,6 +171,7 @@ export default function Page() {
 
   // --- REAL-TIME FIRESTORE WISHES BOARD SUBSCRIPTION ---
   useEffect(() => {
+    if (!isAuthenticated) return;
     const wishesCollection = collection(db, "artifacts", "theresa-celebration-portal", "public", "data", "wishes");
 
     // Real-time listener conforming to the strict database-coupling error patterns
@@ -189,7 +204,8 @@ export default function Page() {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [isAuthenticated]);
+
 
   // --- EXTENDED FULL-STACK SERVER PROXY GEMINI API INTERACTION ---
   const callPolishedServerGeminiApi = async (payload: {
@@ -316,8 +332,16 @@ export default function Page() {
 
     setUploadLoading(true);
     const reader = new FileReader();
+    reader.onerror = () => {
+      setUploadLoading(false);
+      showStatus("error", "Failed to read the image file.");
+    };
     reader.onload = (event: any) => {
       const img = new (window as any).Image();
+      img.onerror = () => {
+        setUploadLoading(false);
+        showStatus("error", "Failed to load image file.");
+      };
       img.onload = () => {
         const canvas = document.createElement("canvas");
         const MAX_WIDTH = 450;
@@ -552,7 +576,7 @@ export default function Page() {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         referrerPolicy="no-referrer"
                         onError={(e: any) => {
-                          e.target.src = "https://res.cloudinary.com/savvyone/image/upload/v1781153246/TopPhoto1_zkhbrj.jpg";
+                          e.target.src = "https://picsum.photos/seed/portrait/800/600";
                         }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#800020]/30 via-transparent to-transparent"></div>
