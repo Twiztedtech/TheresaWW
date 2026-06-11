@@ -354,8 +354,8 @@ export default function Page() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      showStatus("error", "Please choose a photo size smaller than 5MB to optimize successfully.");
+    if (file.size > 6 * 1024 * 1024) {
+      showStatus("error", "Please choose a photo size smaller than 6MB to optimize successfully.");
       return;
     }
 
