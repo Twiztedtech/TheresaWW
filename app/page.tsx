@@ -354,8 +354,8 @@ export default function Page() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 6 * 1024 * 1024) {
-      showStatus("error", "Please choose a photo size smaller than 6MB to optimize successfully.");
+    if (file.size > 20 * 1024 * 1024) {
+      showStatus("error", "Please choose a photo size smaller than 20MB to optimize successfully.");
       return;
     }
 
@@ -1096,6 +1096,8 @@ export default function Page() {
                                       type="button"
                                       onClick={() => setAttachedPhoto("")}
                                       className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-0.5 shadow select-none"
+                                      title="Remove Photo"
+                                      aria-label="Remove Photo"
                                     >
                                       <X size={10} />
                                     </button>
@@ -1136,8 +1138,10 @@ export default function Page() {
                                       type="button"
                                       onClick={() => setActivePhoto({ url: wish.photoBase64, title: "Memory from " + wish.name, fallbackUrl: "" })}
                                       className="w-12 h-12 rounded-lg overflow-hidden border border-amber-400/50 hover:border-amber-400 shrink-0 hover:scale-105 active:scale-95 transition-all shadow-sm relative group"
+                                      title={`View photo shared by ${wish.name}`}
+                                      aria-label={`View photo shared by ${wish.name}`}
                                     >
-                                      <img src={wish.photoBase64} className="w-full h-full object-cover" />
+                                      <img src={wish.photoBase64} alt={`Photo shared by ${wish.name}`} title={`Photo shared by ${wish.name}`} className="w-full h-full object-cover" />
                                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <span className="text-[7px] text-white font-bold tracking-widest uppercase">Zoom</span>
                                       </div>
@@ -1239,6 +1243,8 @@ export default function Page() {
               <button
                 onClick={() => setActivePhoto(null)}
                 className="absolute top-3 right-3 bg-white/80 dark:bg-zinc-800 dark:text-gray-350 hover:bg-red-500 hover:text-white rounded-full p-1.5 transition-colors shadow z-10 text-gray-700"
+                title="Close Lightbox"
+                aria-label="Close Lightbox"
               >
                 <X size={18} />
               </button>
